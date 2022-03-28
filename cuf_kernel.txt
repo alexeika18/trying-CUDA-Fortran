@@ -1,0 +1,15 @@
+program incTest
+    use cudafor
+    implicit none
+    integer, parameter :: n = 256
+    integer :: a(n), b
+    integer, device :: a_d(n)
+    integer :: i
+    a = 1; b = 3; a_d = a
+    !$cuf kernel do <<<*,*>>>
+    do i = 1, n
+        a_d(i) = a_d(i) + b
+    end do
+    a = a_d
+    if (all(a == 4)) write(*,*) 'Test Passed'
+end program incTest
