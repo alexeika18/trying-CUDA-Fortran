@@ -1,0 +1,12 @@
+module wavefunc
+contains
+	attributes(global) subroutine wavefunc(x,a)
+		implicit none
+		real :: x(:), wf(:)
+		real, value :: a
+		integer :: i, n
+		n = size(x)
+		i = blockDim%x * (blockIdx%x - 1) + threadIdx%x
+		if (i <= n) wf(i) = Exp(-a*x(i)*x(i))
+	end subroutine wavefunc
+end module wavefunc
