@@ -1,0 +1,58 @@
+! compilation nvfortran -cudalib=cufft cufft1d_test.cuf
+program fftGauss
+    use cudafor
+    use cufft
+    use gaussmodule
+    implicit none
+
+    integer, parameter :: n = 512
+    real(8), parameter :: eps = 1d-14 ! accuracy
+	real(8) :: xmin, xmax, sigma, mu
+	integer :: i
+
+    ! Managed variables may be used in both host and device code
+    complex(8), managed :: a(n), b(n)
+
+    real(8) x
+    integer plan, ierr
+    logical passing
+
+    write (6,*) "Enter xmin"
+	read (*,*) xmin
+	write (6,*) "Enter xmax"
+	read (*,*) xmax
+	write (6,*) "Enter sigma"
+	read (*,*) sigma
+	write (6,*) "Enter mu"
+	read (*,*) mu
+
+    do i = 1, n
+		a(i) = gaussfunc(xmin + i*(xmax - xmin)/n, mu, sigma)
+	end do
+
+    ierr = cufftPlan1D(plan,n,CUFFT_Z2Z, 1)
+    ierr = ierr + cufftExecZ2Z(plan,a,b,CUFFT_FORWARD)
+    ierr = ierr + cufftExecZ2Z(plan,b,b,CUFFT_INVERSE)
+    ierr = ierr + cudaDeviceSynchronize()
+
+    do i = 1, n
+		open (6, file="gauss_fft.txt")
+		write (6,*) 2*(355.0/113.0)*i/(xmax - xmin), b(i)
+	end do
+
+    x = maxval(abs(a-b/(n)))
+    write(*,*) 'Max error Z2Z: ', x
+
+    passing = x .le. eps
+
+    ierr = ierr + cufftDestroy(plan)
+!    print *,ierr
+
+    passing = passing .and. (ierr .eq. 0)
+ !   if (passing) then
+ !       print *,"Test PASSED"
+ !   else
+  !      print *,"Test FAILED"
+  !  endif
+
+end program fftGauss
