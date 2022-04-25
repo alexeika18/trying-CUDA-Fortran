@@ -1,4 +1,4 @@
-! compilation nvfortran -cudalib=cufft cufft1d_test.cuf
+! compilation nvfortran -cudalib=cufft fft_main.cuf function_module.o -o Gauss_fft.exe
 program fftGauss
     use cudafor
     use cufft
