@@ -1,0 +1,11 @@
+module gaussmodule
+	implicit none
+	public :: gaussfunc
+  contains
+	real(8) function gaussfunc(x, mu, sigma) result(gaussfuncval)
+	implicit none
+		real(8), intent(in) :: x, Pi, sigma, mu
+		Pi = 355.0/113.0
+      gaussfuncval = 1/(sigma*sqrt(2*Pi))*Exp(-1.0/2.0*((x - mu)/sigma)*((x - mu)/sigma))
+	end function gaussfunc
+end module
